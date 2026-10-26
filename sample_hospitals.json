@@ -1,0 +1,109 @@
+{
+  "notice": "Fictional sample records for prototype demonstration only. Replace with verified data before use.",
+  "hospitals": [
+    {
+      "id": 1,
+      "name": "Demo General Hospital – T. Nagar",
+      "area": "T. Nagar, Chennai",
+      "lat": 13.0418,
+      "lon": 80.2337,
+      "services": [
+        "Emergency",
+        "General",
+        "Paediatrics"
+      ],
+      "phone": "044-0000-0001"
+    },
+    {
+      "id": 2,
+      "name": "Demo Medical Centre – Adyar",
+      "area": "Adyar, Chennai",
+      "lat": 13.0067,
+      "lon": 80.257,
+      "services": [
+        "Emergency",
+        "Cardiac",
+        "General"
+      ],
+      "phone": "044-0000-0002"
+    },
+    {
+      "id": 3,
+      "name": "Demo Trauma Care – Guindy",
+      "area": "Guindy, Chennai",
+      "lat": 13.0068,
+      "lon": 80.2206,
+      "services": [
+        "Emergency",
+        "Trauma",
+        "General"
+      ],
+      "phone": "044-0000-0003"
+    },
+    {
+      "id": 4,
+      "name": "Demo Women & Child Centre – Mylapore",
+      "area": "Mylapore, Chennai",
+      "lat": 13.033,
+      "lon": 80.2697,
+      "services": [
+        "Emergency",
+        "Paediatrics",
+        "Women’s health"
+      ],
+      "phone": "044-0000-0004"
+    },
+    {
+      "id": 5,
+      "name": "Demo Cardiac Centre – Kilpauk",
+      "area": "Kilpauk, Chennai",
+      "lat": 13.0827,
+      "lon": 80.242,
+      "services": [
+        "Emergency",
+        "Cardiac",
+        "General"
+      ],
+      "phone": "044-0000-0005"
+    },
+    {
+      "id": 6,
+      "name": "Demo Community Hospital – Velachery",
+      "area": "Velachery, Chennai",
+      "lat": 12.975,
+      "lon": 80.2212,
+      "services": [
+        "Emergency",
+        "General",
+        "Paediatrics"
+      ],
+      "phone": "044-0000-0006"
+    },
+    {
+      "id": 7,
+      "name": "Demo Medical Centre – Anna Nagar",
+      "area": "Anna Nagar, Chennai",
+      "lat": 13.085,
+      "lon": 80.2101,
+      "services": [
+        "Emergency",
+        "Trauma",
+        "General"
+      ],
+      "phone": "044-0000-0007"
+    },
+    {
+      "id": 8,
+      "name": "Demo Care Centre – Perambur",
+      "area": "Perambur, Chennai",
+      "lat": 13.1175,
+      "lon": 80.233,
+      "services": [
+        "Emergency",
+        "General",
+        "Women’s health"
+      ],
+      "phone": "044-0000-0008"
+    }
+  ]
+}

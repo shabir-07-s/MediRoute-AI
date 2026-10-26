@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MediRoute AI | Emergency Hospital Finder</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+:root{--navy:#102a43;--navy2:#173f5f;--teal:#00a6a6;--mint:#e8fbf8;--bg:#f4f8fb;--ink:#203344;--muted:#657889;--orange:#f59e0b;--red:#d9485f;--white:#fff;--border:#dce7ed}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--navy),var(--navy2));color:#fff;padding:22px clamp(16px,4vw,48px);display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:var(--teal);display:grid;place-items:center;font-size:25px;font-weight:900}.brand h1{margin:0;font-size:clamp(20px,3vw,29px)}.brand p{margin:3px 0 0;color:#c8e5ef;font-size:13px}
+.header-actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer;font-size:13px}.btn-primary{background:var(--teal);color:white}.btn-light{background:white;color:var(--navy)}.btn-outline{background:#fff;color:var(--navy);border:1px solid var(--border)}button:focus,input:focus,select:focus{outline:3px solid #8ee4df;outline-offset:2px}
+main{max-width:1400px;margin:auto;padding:22px clamp(12px,3vw,32px) 36px}
+.alert{background:#fff6df;border:1px solid #f2d48a;color:#76500c;border-radius:12px;padding:12px 15px;font-size:13px;line-height:1.5;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);gap:18px;align-items:stretch}
+.panel{background:white;border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px #173f5f0b;overflow:hidden}.panel-head{padding:18px 18px 12px;border-bottom:1px solid var(--border)}.panel-head h2{margin:0;font-size:17px}.panel-head p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.4}
+.controls{padding:14px 16px;display:grid;gap:10px}.searchrow{display:flex;gap:8px}.searchrow input{flex:1;min-width:0}.input,select{width:100%;border:1px solid #cddbe3;border-radius:9px;padding:11px 12px;background:white;color:var(--ink);font-size:13px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px}.small-label{display:block;font-size:11px;font-weight:800;color:#506677;margin:0 0 5px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:0 16px 12px}.pill{background:var(--mint);color:#087f78;border-radius:99px;padding:5px 8px;font-weight:800;font-size:10px}
+.list{padding:0 10px 12px;max-height:510px;overflow:auto}.hospital{border:1px solid var(--border);border-radius:12px;padding:13px;margin:8px 4px;background:white}.hospital.best{border:2px solid var(--teal);background:#f4fffd}.h-top{display:flex;justify-content:space-between;gap:10px}.hospital h3{font-size:14px;margin:0 0 5px}.hospital .type{font-size:11px;color:var(--muted)}.distance{white-space:nowrap;font-size:12px;font-weight:850;color:#087f78}.tags{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}.tag{background:#edf4f7;color:#456071;border-radius:6px;padding:4px 6px;font-size:10px}.tag.good{background:#e5faf1;color:#08784e}.tag.warn{background:#fff2d8;color:#87590a}.card-actions{display:flex;gap:7px;flex-wrap:wrap}.card-actions a,.card-actions button{font-size:11px;text-decoration:none;border:1px solid #cddbe3;background:#fff;color:var(--navy);border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer}.card-actions .route{background:var(--navy);color:#fff;border-color:var(--navy)}
+.map-panel{display:flex;flex-direction:column;min-height:650px}.map-toolbar{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.map-toolbar strong{font-size:14px}.map-toolbar span{font-size:11px;color:var(--muted)}#map{flex:1;min-height:530px;z-index:1}.map-legend{padding:11px 16px;display:flex;gap:16px;flex-wrap:wrap;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.empty{padding:24px 14px;color:var(--muted);font-size:13px;text-align:center}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 25px #0003;z-index:10000;font-size:13px;display:none;max-width:90vw}
+footer{padding:20px;text-align:center;color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.map-panel{min-height:500px}#map{min-height:420px}.list{max-height:400px}}
+@media(max-width:480px){header{padding:17px 14px}.header-actions{width:100%}.header-actions button{flex:1}.filters{grid-template-columns:1fr}.map-toolbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">+</div><div><h1>MediRoute AI</h1><p>Emergency Hospital Finder · AI + GIS concept prototype</p></div></div>
+  <div class="header-actions">
+    <button class="btn btn-light" id="locateBtn">◎ Use my location</button>
+    <button class="btn btn-primary" id="resetBtn">Reset demo</button>
+  </div>
+</header>
+<main>
+  <div class="alert"><strong>Prototype notice:</strong> Hospital entries below are sample demonstration records for Chennai, not a verified live hospital directory. Bed availability, emergency capacity and service status are <strong>not live</strong>. In a real emergency, contact local emergency services and call a facility before travelling. This app does not provide medical advice.</div>
+  <div class="grid">
+    <section class="panel">
+      <div class="panel-head"><h2>Find a suitable hospital</h2><p>Search the demo list, choose a service and compare nearby options.</p></div>
+      <div class="controls">
+        <div><label class="small-label" for="search">Search by hospital, area or service</label><div class="searchrow"><input class="input" id="search" placeholder="e.g. Adyar, emergency, cardiac" /><button class="btn btn-primary" id="searchBtn">Search</button></div></div>
+        <div class="filters">
+          <div><label class="small-label" for="service">Required service</label><select id="service"><option value="any">Any listed service</option><option>Emergency</option><option>Cardiac</option><option>Trauma</option><option>Paediatrics</option><option>General</option><option>Women’s health</option></select></div>
+          <div><label class="small-label" for="sort">Rank results by</label><select id="sort"><option value="relevance">Best match</option><option value="distance">Nearest first</option><option value="name">Name A–Z</option></select></div>
+        </div>
+      </div>
+      <div class="status"><span id="resultCount">Loading demo hospitals…</span><span class="pill" id="locationStatus">Demo location</span></div>
+      <div class="list" id="hospitalList"></div>
+    </section>
+    <section class="panel map-panel">
+      <div class="map-toolbar"><div><strong>Hospital map</strong><br><span>Map tiles require an internet connection.</span></div><span id="mapStatus">Showing Chennai demo area</span></div>
+      <div id="map" role="application" aria-label="Map showing sample hospital locations"></div>
+      <div class="map-legend"><span><i class="dot" style="background:#00a6a6"></i>Sample hospital</span><span><i class="dot" style="background:#d9485f"></i>Your selected location</span><span>Route buttons open an external map service.</span></div>
+    </section>
+  </div>
+</main>
+<footer>EngX · Sri Sairam Engineering College · HSC prototype draft<br>GIS uses Leaflet and OpenStreetMap tiles. Sample records must be replaced with verified, maintained data before public use.</footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const hospitals = [
+ {id:1,name:"Demo General Hospital – T. Nagar",area:"T. Nagar, Chennai",lat:13.0418,lon:80.2337,services:["Emergency","General","Paediatrics"],phone:"044-0000-0001",kind:"General hospital"},
+ {id:2,name:"Demo Medical Centre – Adyar",area:"Adyar, Chennai",lat:13.0067,lon:80.2570,services:["Emergency","Cardiac","General"],phone:"044-0000-0002",kind:"Multi-specialty centre"},
+ {id:3,name:"Demo Trauma Care – Guindy",area:"Guindy, Chennai",lat:13.0068,lon:80.2206,services:["Emergency","Trauma","General"],phone:"044-0000-0003",kind:"Trauma centre"},
+ {id:4,name:"Demo Women & Child Centre – Mylapore",area:"Mylapore, Chennai",lat:13.0330,lon:80.2697,services:["Emergency","Paediatrics","Women’s health"],phone:"044-0000-0004",kind:"Women & child centre"},
+ {id:5,name:"Demo Cardiac Centre – Kilpauk",area:"Kilpauk, Chennai",lat:13.0827,lon:80.2420,services:["Emergency","Cardiac","General"],phone:"044-0000-0005",kind:"Specialty centre"},
+ {id:6,name:"Demo Community Hospital – Velachery",area:"Velachery, Chennai",lat:12.9750,lon:80.2212,services:["Emergency","General","Paediatrics"],phone:"044-0000-0006",kind:"Community hospital"},
+ {id:7,name:"Demo Medical Centre – Anna Nagar",area:"Anna Nagar, Chennai",lat:13.0850,lon:80.2101,services:["Emergency","Trauma","General"],phone:"044-0000-0007",kind:"Multi-specialty centre"},
+ {id:8,name:"Demo Care Centre – Perambur",area:"Perambur, Chennai",lat:13.1175,lon:80.2330,services:["Emergency","General","Women’s health"],phone:"044-0000-0008",kind:"Community hospital"}
+];
+let userLocation={lat:13.0827,lon:80.2707,label:"Chennai demo centre"};
+let hasRealLocation=false, markers=[], userMarker=null;
+const map=L.map('map').setView([userLocation.lat,userLocation.lon],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+const hospitalIcon=L.divIcon({className:'',html:'<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#00a6a6;border:3px solid white;box-shadow:0 2px 6px #0004;display:grid;place-items:center"><span style="color:white;font-weight:900;transform:rotate(45deg);font-size:15px">+</span></div>',iconSize:[28,28],iconAnchor:[14,28]});
+const userIcon=L.divIcon({className:'',html:'<div style="width:18px;height:18px;border-radius:50%;background:#d9485f;border:3px solid white;box-shadow:0 0 0 5px #d9485f33"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+function distanceKm(a,b){const R=6371,rad=x=>x*Math.PI/180;const dLat=rad(b.lat-a.lat),dLon=rad(b.lon-a.lon);const v=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(v));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.style.display='none',3600);}
+function getResults(){
+ const q=document.getElementById('search').value.trim().toLowerCase(),service=document.getElementById('service').value,sort=document.getElementById('sort').value;
+ let arr=hospitals.map(h=>({...h,distance:distanceKm(userLocation,h),matches:service==='any'||h.services.includes(service)}))
+ .filter(h=>(!q||(h.name+' '+h.area+' '+h.services.join(' ')).toLowerCase().includes(q))&&h.matches);
+ arr.sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='distance'?a.distance-b.distance:(Number(b.matches)-Number(a.matches)||a.distance-b.distance));
+ return arr;
+}
+function render(){
+ const arr=getResults();document.getElementById('resultCount').textContent=`${arr.length} demo result${arr.length===1?'':'s'} · distance is approximate`;
+ const list=document.getElementById('hospitalList');
+ if(!arr.length){list.innerHTML='<div class="empty">No matching demo records. Try another service or search term.</div>';} else {
+ list.innerHTML=arr.map((h,i)=>`<article class="hospital ${i===0?'best':''}">
+ <div class="h-top"><div><h3>${esc(h.name)}</h3><div class="type">${esc(h.kind)} · ${esc(h.area)}</div></div><div class="distance">${h.distance.toFixed(1)} km</div></div>
+ <div class="tags">${h.services.map(s=>`<span class="tag ${s===document.getElementById('service').value?'good':''}">${esc(s)}</span>`).join('')}<span class="tag warn">Demo record</span></div>
+ <div class="card-actions"><a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userLocation.lat}%2C${userLocation.lon}%3B${h.lat}%2C${h.lon}" target="_blank" rel="noopener">Open route ↗</a><button onclick="showOnMap(${h.id})">Show on map</button><button onclick="toast('Demo contact only — do not call: ${h.phone}')">Contact info</button></div>
+ </article>`).join('');
+ }
+ markers.forEach(m=>map.removeLayer(m));markers=[];
+ arr.forEach(h=>{const m=L.marker([h.lat,h.lon],{icon:hospitalIcon}).addTo(map).bindPopup(`<strong>${esc(h.name)}</strong><br>${esc(h.area)}<br><em>Demo record — not verified</em><br>${h.distance.toFixed(1)} km away`);markers.push(m);});
+ if(userMarker)map.removeLayer(userMarker);
+ userMarker=L.marker([userLocation.lat,userLocation.lon],{icon:userIcon}).addTo(map).bindPopup(`<strong>${esc(userLocation.label)}</strong>`);
+ document.getElementById('locationStatus').textContent=hasRealLocation?'GPS location':'Demo location';
+ document.getElementById('mapStatus').textContent=hasRealLocation?'GPS location selected · sample hospitals remain Chennai-only':'Showing Chennai demo area';
+ if(!hasRealLocation)map.setView([13.0827,80.2707],11);
+}
+function showOnMap(id){const h=hospitals.find(x=>x.id===id);map.setView([h.lat,h.lon],15);const m=markers.find(x=>{const ll=x.getLatLng();return Math.abs(ll.lat-h.lat)<0.0001&&Math.abs(ll.lng-h.lon)<0.0001});if(m)m.openPopup();}
+function locate(){
+ if(!navigator.geolocation){toast('Geolocation is not supported by this browser.');return;}
+ toast('Requesting location permission…');
+ navigator.geolocation.getCurrentPosition(pos=>{userLocation={lat:pos.coords.latitude,lon:pos.coords.longitude,label:'Your current location'};hasRealLocation=true;map.setView([userLocation.lat,userLocation.lon],12);render();toast('Location updated. Note: sample hospital records are still Chennai-only.');},err=>{toast('Could not access location. Allow location permission or continue with demo location.');},{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+}
+document.getElementById('locateBtn').addEventListener('click',locate);
+document.getElementById('resetBtn').addEventListener('click',()=>{userLocation={lat:13.0827,lon:80.2707,label:'Chennai demo centre'};hasRealLocation=false;document.getElementById('search').value='';document.getElementById('service').value='any';document.getElementById('sort').value='relevance';render();toast('Demo reset.');});
+document.getElementById('searchBtn').addEventListener('click',render);
+document.getElementById('search').addEventListener('keydown',e=>{if(e.key==='Enter')render();});
+document.getElementById('service').addEventListener('change',render);
+document.getElementById('sort').addEventListener('change',render);
+render();
+</script>
+</body>
+</html>
